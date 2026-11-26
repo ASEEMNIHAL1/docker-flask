@@ -233,3 +233,79 @@ https://github.com/ASEEMNIHAL1/docker-flask
 ## 12. Conclusion
 
 This project demonstrates the fundamentals of Docker containerization and Continuous Integration using GitHub Actions. The Flask application was successfully packaged into a Docker image, executed inside a container, and tested through its HTTP endpoints. GitHub Actions was configured to automate Docker image builds whenever changes are pushed to the repository.
+
+## 13. Fixing the Teammate's Broken Docker Configuration
+
+The assignment provided a Dockerfile and Docker run command containing three errors that could prevent the application from building or being accessed.
+
+### Problem 1: Incorrect Dockerfile instruction
+
+**Incorrect:**
+```dockerfile
+FORM python:3.12-slim
+```
+
+**Correction:**
+```dockerfile
+FROM python:3.12-slim
+```
+
+**Explanation:** `FROM` is the valid Dockerfile instruction used to specify the base image. `FORM` is invalid and causes a Docker build error.
+
+### Problem 2: Incorrect requirements filename
+
+**Incorrect:**
+```dockerfile
+RUN pip install -r requirement.txt
+```
+
+**Correction:**
+```dockerfile
+RUN pip install -r requirements.txt
+```
+
+**Explanation:** The provided dependency file is named `requirements.txt`. Using `requirement.txt` causes the installation command to fail because the file cannot be found.
+
+### Problem 3: Incorrect port mapping
+
+**Incorrect:**
+```bash
+docker run -p 5000:8080 myapp
+```
+
+**Correction:**
+```bash
+docker run -p 5000:5000 myapp
+```
+
+**Explanation:** The Flask application listens on port 5000 inside the container. The original command maps host port 5000 to container port 8080, so requests are forwarded to the wrong container port.
+
+### Corrected Docker configuration
+
+```dockerfile
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY app.py .
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]
+```
+
+### Verification
+
+After correcting the Docker configuration:
+
+- The Docker image was built successfully.
+- The Flask container started successfully.
+- The homepage returned HTTP 200 OK.
+- The `/health` endpoint returned `{"status":"ok"}`.
+- GitHub Actions successfully built the Docker image.
+
+**Conclusion:** Correct Dockerfile syntax, dependency filenames, and port mapping are essential for building and accessing a containerized application.
